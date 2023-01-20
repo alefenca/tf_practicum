@@ -44,17 +44,12 @@ resource "yandex_alb_load_balancer" "this" {
   network_id = yandex_vpc_network.this.id
 
   allocation_policy {
-    location {
-      zone_id   = "ru-central1-a"
-      subnet_id = yandex_vpc_subnet.this["ru-central1-a"].id
-    }
-    location {
-      zone_id   = "ru-central1-b"
-      subnet_id = yandex_vpc_subnet.this["ru-central1-b"].id
-    }
-    location {
-      zone_id   = "ru-central1-c"
-      subnet_id = yandex_vpc_subnet.this["ru-central1-c"].id
+    dynamic "location" {
+      for_each = toset(var.az)
+      content {
+        zone_id = location.value
+        subnet_id = yandex_vpc_subnet.this[location.value].id
+      }
     }
   }
 
